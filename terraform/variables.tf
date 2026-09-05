@@ -3,3 +3,27 @@ variable "aws_region" {
   description = "AWS region in which this project's resources will be managed."
   default     = "us-east-1"
 }
+
+variable "project_name" {
+  type        = string
+  description = "Project name applied to AWS resource tags."
+  default     = "devops-cicd-aws-eks"
+}
+
+variable "vpc_cidr" {
+  type        = string
+  description = "IPv4 CIDR block for the project VPC."
+  default     = "10.0.0.0/16"
+}
+
+variable "public_subnet_cidrs" {
+  type        = list(string)
+  description = "IPv4 CIDR blocks for the public subnets."
+  default     = ["10.0.1.0/24", "10.0.2.0/24"]
+}
+
+variable "private_subnet_cidrs" {
+  type        = list(string)
+  description = "IPv4 CIDR blocks for the private subnets."
+  default     = ["10.0.11.0/24", "10.0.12.0/24"]
+}
