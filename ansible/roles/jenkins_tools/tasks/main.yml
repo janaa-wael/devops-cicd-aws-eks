@@ -1,0 +1,137 @@
+---
+- name: Install common tool prerequisites
+  ansible.builtin.apt:
+    name:
+      - ca-certificates
+      - curl
+      - git
+      - unzip
+    state: present
+    update_cache: true
+    cache_valid_time: 3600
+
+- name: Ensure the APT keyring directory exists
+  ansible.builtin.file:
+    path: /etc/apt/keyrings
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Determine the Debian package architecture
+  ansible.builtin.command: dpkg --print-architecture
+  register: debian_architecture
+  changed_when: false
+
+- name: Install the official Docker repository signing key
+  ansible.builtin.get_url:
+    url: https://download.docker.com/linux/ubuntu/gpg
+    dest: /etc/apt/keyrings/docker.asc
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Configure the official Docker repository
+  ansible.builtin.apt_repository:
+    repo: >-
+      deb [arch={{ debian_architecture.stdout }} signed-by=/etc/apt/keyrings/docker.asc]
+      https://download.docker.com/linux/ubuntu
+      {{ ansible_distribution_release }} stable
+    filename: docker
+    state: present
+    update_cache: true
+
+- name: Install Docker Engine and build tooling
+  ansible.builtin.apt:
+    name:
+      - containerd.io
+      - docker-buildx-plugin
+      - docker-ce
+      - docker-ce-cli
+    state: present
+
+- name: Enable and start Docker
+  ansible.builtin.systemd_service:
+    name: docker
+    enabled: true
+    state: started
+
+- name: Grant Jenkins access to the Docker socket
+  ansible.builtin.user:
+    name: jenkins
+    groups: docker
+    append: true
+  notify: Restart Jenkins after Docker group membership changes
+
+- name: Check whether AWS CLI v2 is installed globally
+  ansible.builtin.stat:
+    path: /usr/local/bin/aws
+  register: aws_cli_binary
+
+- name: Install AWS CLI v2 from the official distribution
+  when: not aws_cli_binary.stat.exists
+  block:
+    - name: Download the official AWS CLI v2 installer
+      ansible.builtin.get_url:
+        url: https://awscli.amazonaws.com/awscli-exe-linux-x86_64-2.34.44.zip
+        dest: /var/tmp/awscliv2.zip
+        owner: root
+        group: root
+        mode: "0644"
+
+    - name: Create the AWS CLI installer directory
+      ansible.builtin.file:
+        path: /var/tmp/awscli-installer
+        state: directory
+        owner: root
+        group: root
+        mode: "0755"
+
+    - name: Extract the AWS CLI v2 installer
+      ansible.builtin.unarchive:
+        src: /var/tmp/awscliv2.zip
+        dest: /var/tmp/awscli-installer
+        remote_src: true
+        creates: /var/tmp/awscli-installer/aws/install
+
+    - name: Install AWS CLI v2 globally
+      ansible.builtin.command:
+        argv:
+          - /var/tmp/awscli-installer/aws/install
+          - --bin-dir
+          - /usr/local/bin
+          - --install-dir
+          - /usr/local/aws-cli
+        creates: /usr/local/bin/aws
+
+    - name: Remove the downloaded AWS CLI archive
+      ansible.builtin.file:
+        path: /var/tmp/awscliv2.zip
+        state: absent
+
+    - name: Remove the extracted AWS CLI installer
+      ansible.builtin.file:
+        path: /var/tmp/awscli-installer
+        state: absent
+
+- name: Install the official Kubernetes repository signing key
+  ansible.builtin.get_url:
+    url: https://pkgs.k8s.io/core:/stable:/v1.35/deb/Release.key
+    dest: /etc/apt/keyrings/kubernetes-apt-keyring.asc
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Configure the official Kubernetes 1.35 repository
+  ansible.builtin.apt_repository:
+    repo: >-
+      deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.asc]
+      https://pkgs.k8s.io/core:/stable:/v1.35/deb/ /
+    filename: kubernetes
+    state: present
+    update_cache: true
+
+- name: Install kubectl 1.35
+  ansible.builtin.apt:
+    name: kubectl
+    state: present
