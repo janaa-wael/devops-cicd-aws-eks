@@ -48,3 +48,9 @@ variable "jenkins_public_key_path" {
   type        = string
   description = "Local path to the public SSH key imported into AWS for Jenkins access."
 }
+
+variable "ecr_repository_name" {
+  type        = string
+  description = "Name of the private ECR repository that stores application images."
+  default     = "devops-flask-app"
+}

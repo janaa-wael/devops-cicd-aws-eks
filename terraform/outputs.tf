@@ -27,3 +27,18 @@ output "jenkins_public_dns" {
   description = "Public DNS name of the Jenkins EC2 instance."
   value       = aws_instance.jenkins.public_dns
 }
+
+output "ecr_repository_name" {
+  description = "Name of the private ECR repository."
+  value       = aws_ecr_repository.app.name
+}
+
+output "ecr_repository_url" {
+  description = "URL used to push and pull images in the private ECR repository."
+  value       = aws_ecr_repository.app.repository_url
+}
+
+output "ecr_repository_arn" {
+  description = "ARN of the private ECR repository."
+  value       = aws_ecr_repository.app.arn
+}
