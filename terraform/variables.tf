@@ -27,3 +27,24 @@ variable "private_subnet_cidrs" {
   description = "IPv4 CIDR blocks for the private subnets."
   default     = ["10.0.11.0/24", "10.0.12.0/24"]
 }
+
+variable "allowed_admin_cidr" {
+  type        = string
+  description = "Single IPv4 address in /32 CIDR notation allowed to administer Jenkins."
+
+  validation {
+    condition     = can(cidrnetmask(var.allowed_admin_cidr)) && endswith(var.allowed_admin_cidr, "/32")
+    error_message = "allowed_admin_cidr must be a valid single-host IPv4 CIDR ending in /32."
+  }
+}
+
+variable "jenkins_instance_type" {
+  type        = string
+  description = "EC2 instance type for the Jenkins server."
+  default     = "t3.small"
+}
+
+variable "jenkins_public_key_path" {
+  type        = string
+  description = "Local path to the public SSH key imported into AWS for Jenkins access."
+}
