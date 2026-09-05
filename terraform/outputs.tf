@@ -57,3 +57,18 @@ output "eks_cluster_endpoint" {
   description = "Kubernetes API endpoint of the Amazon EKS cluster."
   value       = aws_eks_cluster.main.endpoint
 }
+
+output "eks_node_group_name" {
+  description = "Name of the EKS managed node group."
+  value       = aws_eks_node_group.main.node_group_name
+}
+
+output "eks_node_group_arn" {
+  description = "ARN of the EKS managed node group."
+  value       = aws_eks_node_group.main.arn
+}
+
+output "eks_node_role_arn" {
+  description = "ARN of the IAM role assumed by the EKS worker nodes."
+  value       = aws_iam_role.eks_node.arn
+}
