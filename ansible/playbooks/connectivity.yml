@@ -1,0 +1,31 @@
+---
+- name: Verify Jenkins server connectivity
+  hosts: jenkins
+  gather_facts: false
+
+  tasks:
+    - name: Read remote hostname
+      ansible.builtin.command: hostname
+      register: remote_hostname
+      changed_when: false
+
+    - name: Read remote user
+      ansible.builtin.command: whoami
+      register: remote_user
+      changed_when: false
+
+    - name: Read remote Ubuntu version
+      ansible.builtin.command:
+        argv:
+          - grep
+          - ^PRETTY_NAME=
+          - /etc/os-release
+      register: remote_os
+      changed_when: false
+
+    - name: Report connectivity details
+      ansible.builtin.debug:
+        msg:
+          - "Hostname: {{ remote_hostname.stdout }}"
+          - "User: {{ remote_user.stdout }}"
+          - "OS: {{ remote_os.stdout }}"
