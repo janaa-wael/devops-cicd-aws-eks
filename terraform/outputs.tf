@@ -42,3 +42,18 @@ output "ecr_repository_arn" {
   description = "ARN of the private ECR repository."
   value       = aws_ecr_repository.app.arn
 }
+
+output "eks_cluster_name" {
+  description = "Name of the Amazon EKS cluster."
+  value       = aws_eks_cluster.main.name
+}
+
+output "eks_cluster_arn" {
+  description = "ARN of the Amazon EKS cluster."
+  value       = aws_eks_cluster.main.arn
+}
+
+output "eks_cluster_endpoint" {
+  description = "Kubernetes API endpoint of the Amazon EKS cluster."
+  value       = aws_eks_cluster.main.endpoint
+}

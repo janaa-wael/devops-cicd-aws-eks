@@ -30,7 +30,7 @@ variable "private_subnet_cidrs" {
 
 variable "allowed_admin_cidr" {
   type        = string
-  description = "Single IPv4 address in /32 CIDR notation allowed to administer Jenkins."
+  description = "Single IPv4 address in /32 CIDR notation allowed to administer Jenkins and access the EKS public API."
 
   validation {
     condition     = can(cidrnetmask(var.allowed_admin_cidr)) && endswith(var.allowed_admin_cidr, "/32")
@@ -53,4 +53,16 @@ variable "ecr_repository_name" {
   type        = string
   description = "Name of the private ECR repository that stores application images."
   default     = "devops-flask-app"
+}
+
+variable "eks_cluster_name" {
+  type        = string
+  description = "Name of the Amazon EKS cluster."
+  default     = "devops-eks-cluster"
+}
+
+variable "eks_cluster_version" {
+  type        = string
+  description = "Kubernetes version used by the Amazon EKS control plane."
+  default     = "1.35"
 }
