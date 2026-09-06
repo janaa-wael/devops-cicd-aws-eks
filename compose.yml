@@ -1,12 +1,14 @@
 services:
   mysql-services:
-    image: mysql:8.4
+    build:
+      context: ./db
+      dockerfile: Dockerfile
+    image: devops-mysql:8.4
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_ROOT_HOST: "%"
     volumes:
       - mysql-data:/var/lib/mysql
-      - ./db/BucketList.sql:/docker-entrypoint-initdb.d/01-BucketList.sql:ro
     healthcheck:
       test: ["CMD-SHELL", "mysql -h localhost -u root -p$${MYSQL_ROOT_PASSWORD} --database=BucketList --execute='SELECT 1 FROM tbl_user LIMIT 1' >/dev/null 2>&1"]
       interval: 5s
