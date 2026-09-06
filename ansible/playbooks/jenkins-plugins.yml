@@ -1,0 +1,7 @@
+---
+- name: Configure required Jenkins plugins
+  hosts: jenkins
+  become: true
+
+  roles:
+    - jenkins_plugins

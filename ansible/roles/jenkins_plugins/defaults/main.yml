@@ -1,0 +1,11 @@
+---
+jenkins_plugin_manager_version: "2.15.0"
+jenkins_plugin_manager_checksum: >-
+  sha256:a86853ec2e2933f37a4b471ba65099b61e03c87a80c2ef8fe2315eb135672d43
+
+jenkins_required_plugins:
+  - git
+  - workflow-aggregator
+  - github
+  - credentials-binding
+  - pipeline-stage-view
