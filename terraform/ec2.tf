@@ -77,6 +77,7 @@ resource "aws_vpc_security_group_egress_rule" "jenkins_all_ipv4" {
 resource "aws_instance" "jenkins" {
   ami                         = data.aws_ami.ubuntu_2404.id
   instance_type               = var.jenkins_instance_type
+  iam_instance_profile        = aws_iam_instance_profile.jenkins.name
   subnet_id                   = aws_subnet.public[0].id
   vpc_security_group_ids      = [aws_security_group.jenkins.id]
   key_name                    = aws_key_pair.jenkins.key_name

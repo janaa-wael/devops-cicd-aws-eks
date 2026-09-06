@@ -28,6 +28,16 @@ output "jenkins_public_dns" {
   value       = aws_instance.jenkins.public_dns
 }
 
+output "jenkins_iam_role_arn" {
+  description = "ARN of the IAM role assumed by the Jenkins EC2 instance."
+  value       = aws_iam_role.jenkins.arn
+}
+
+output "jenkins_instance_profile_name" {
+  description = "Name of the instance profile associated with the Jenkins EC2 instance."
+  value       = aws_iam_instance_profile.jenkins.name
+}
+
 output "ecr_repository_name" {
   description = "Name of the private ECR repository."
   value       = aws_ecr_repository.app.name
