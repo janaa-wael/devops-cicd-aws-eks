@@ -53,6 +53,11 @@ output "ecr_repository_arn" {
   value       = aws_ecr_repository.app.arn
 }
 
+output "mysql_ecr_repository_url" {
+  description = "URL used to push and pull MySQL images in the private ECR repository."
+  value       = aws_ecr_repository.mysql.repository_url
+}
+
 output "eks_cluster_name" {
   description = "Name of the Amazon EKS cluster."
   value       = aws_eks_cluster.main.name
