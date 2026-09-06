@@ -30,6 +30,11 @@ resource "aws_eks_cluster" "main" {
   role_arn = aws_iam_role.eks_cluster.arn
   version  = var.eks_cluster_version
 
+  access_config {
+    authentication_mode                         = "API_AND_CONFIG_MAP"
+    bootstrap_cluster_creator_admin_permissions = true
+  }
+
   vpc_config {
     subnet_ids              = aws_subnet.private[*].id
     endpoint_private_access = true
@@ -43,4 +48,13 @@ resource "aws_eks_cluster" "main" {
     Name    = var.eks_cluster_name
     Project = var.project_name
   }
+}
+
+resource "aws_vpc_security_group_ingress_rule" "eks_api_from_jenkins" {
+  security_group_id            = aws_eks_cluster.main.vpc_config[0].cluster_security_group_id
+  referenced_security_group_id = aws_security_group.jenkins.id
+  description                  = "Allow Jenkins to reach the private EKS API endpoint"
+  from_port                    = 443
+  to_port                      = 443
+  ip_protocol                  = "tcp"
 }

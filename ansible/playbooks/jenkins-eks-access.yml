@@ -1,0 +1,7 @@
+---
+- name: Configure Jenkins access to Amazon EKS
+  hosts: jenkins
+  become: true
+
+  roles:
+    - jenkins_eks_access

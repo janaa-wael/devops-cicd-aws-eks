@@ -1,0 +1,7 @@
+---
+- name: Configure Jenkins build and deployment tools
+  hosts: jenkins
+  become: true
+
+  roles:
+    - jenkins_tools

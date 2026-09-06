@@ -28,6 +28,16 @@ output "jenkins_public_dns" {
   value       = aws_instance.jenkins.public_dns
 }
 
+output "jenkins_iam_role_arn" {
+  description = "ARN of the IAM role assumed by the Jenkins EC2 instance."
+  value       = aws_iam_role.jenkins.arn
+}
+
+output "jenkins_instance_profile_name" {
+  description = "Name of the instance profile associated with the Jenkins EC2 instance."
+  value       = aws_iam_instance_profile.jenkins.name
+}
+
 output "ecr_repository_name" {
   description = "Name of the private ECR repository."
   value       = aws_ecr_repository.app.name
@@ -56,4 +66,19 @@ output "eks_cluster_arn" {
 output "eks_cluster_endpoint" {
   description = "Kubernetes API endpoint of the Amazon EKS cluster."
   value       = aws_eks_cluster.main.endpoint
+}
+
+output "eks_node_group_name" {
+  description = "Name of the EKS managed node group."
+  value       = aws_eks_node_group.main.node_group_name
+}
+
+output "eks_node_group_arn" {
+  description = "ARN of the EKS managed node group."
+  value       = aws_eks_node_group.main.arn
+}
+
+output "eks_node_role_arn" {
+  description = "ARN of the IAM role assumed by the EKS worker nodes."
+  value       = aws_iam_role.eks_node.arn
 }

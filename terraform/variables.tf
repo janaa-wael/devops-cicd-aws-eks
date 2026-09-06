@@ -66,3 +66,9 @@ variable "eks_cluster_version" {
   description = "Kubernetes version used by the Amazon EKS control plane."
   default     = "1.35"
 }
+
+variable "eks_node_instance_type" {
+  type        = string
+  description = "EC2 instance type used by the EKS managed worker nodes."
+  default     = "t3.small"
+}

@@ -1,0 +1,69 @@
+---
+- name: Ensure the plugin manager directory exists
+  ansible.builtin.file:
+    path: /usr/local/share/jenkins-plugin-manager
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Install the official Jenkins Plugin Installation Manager Tool
+  ansible.builtin.get_url:
+    url: "https://github.com/jenkinsci/plugin-installation-manager-tool/releases/download/{{ jenkins_plugin_manager_version }}/jenkins-plugin-manager-{{ jenkins_plugin_manager_version }}.jar"
+    dest: "/usr/local/share/jenkins-plugin-manager/jenkins-plugin-manager-{{ jenkins_plugin_manager_version }}.jar"
+    checksum: "{{ jenkins_plugin_manager_checksum }}"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Ensure the Jenkins plugin directory has safe ownership
+  ansible.builtin.file:
+    path: /var/lib/jenkins/plugins
+    state: directory
+    owner: jenkins
+    group: jenkins
+    mode: "0755"
+
+- name: Ensure the Jenkins configuration directory exists
+  ansible.builtin.file:
+    path: /etc/jenkins
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Store the declarative Jenkins plugin list
+  ansible.builtin.copy:
+    content: "{{ jenkins_required_plugins | join('\n') }}\n"
+    dest: /etc/jenkins/plugins.txt
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Check whether each required plugin is already installed
+  ansible.builtin.stat:
+    path: "/var/lib/jenkins/plugins/{{ item }}.jpi"
+  loop: "{{ jenkins_required_plugins }}"
+  register: jenkins_required_plugin_files
+
+- name: Install missing plugins and their dependencies
+  ansible.builtin.command:
+    argv:
+      - /usr/bin/sudo
+      - -u
+      - jenkins
+      - /usr/bin/java
+      - -jar
+      - "/usr/local/share/jenkins-plugin-manager/jenkins-plugin-manager-{{ jenkins_plugin_manager_version }}.jar"
+      - --war
+      - /usr/share/java/jenkins.war
+      - --plugin-download-directory
+      - /var/lib/jenkins/plugins
+      - --plugin-file
+      - /etc/jenkins/plugins.txt
+  when: >-
+    jenkins_required_plugin_files.results
+    | selectattr('stat.exists', 'equalto', false)
+    | list
+    | length > 0
+  notify: Restart Jenkins after plugin changes
