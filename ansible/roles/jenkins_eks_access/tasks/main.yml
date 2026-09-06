@@ -1,0 +1,62 @@
+---
+- name: Ensure the Jenkins kubeconfig directory exists
+  ansible.builtin.file:
+    path: "{{ jenkins_eks_home }}/.kube"
+    state: directory
+    owner: "{{ jenkins_eks_user }}"
+    group: "{{ jenkins_eks_group }}"
+    mode: "0700"
+
+- name: Check whether the Jenkins kubeconfig exists
+  ansible.builtin.stat:
+    path: "{{ jenkins_eks_home }}/.kube/config"
+  register: jenkins_eks_kubeconfig
+
+- name: Read the current Jenkins Kubernetes context
+  ansible.builtin.command:
+    argv:
+      - /usr/bin/sudo
+      - -H
+      - -u
+      - "{{ jenkins_eks_user }}"
+      - /usr/bin/kubectl
+      - config
+      - current-context
+      - --kubeconfig
+      - "{{ jenkins_eks_home }}/.kube/config"
+  register: jenkins_eks_current_context
+  changed_when: false
+  failed_when: false
+  when: jenkins_eks_kubeconfig.stat.exists
+
+- name: Generate the Jenkins kubeconfig from its EC2 role
+  ansible.builtin.command:
+    argv:
+      - /usr/bin/sudo
+      - -H
+      - -u
+      - "{{ jenkins_eks_user }}"
+      - /usr/local/bin/aws
+      - eks
+      - update-kubeconfig
+      - --region
+      - "{{ jenkins_eks_region }}"
+      - --name
+      - "{{ jenkins_eks_cluster_name }}"
+      - --alias
+      - "{{ jenkins_eks_cluster_name }}"
+      - --user-alias
+      - devops-jenkins-role
+      - --kubeconfig
+      - "{{ jenkins_eks_home }}/.kube/config"
+  when: >-
+    not jenkins_eks_kubeconfig.stat.exists
+    or (jenkins_eks_current_context.stdout | default('')) != jenkins_eks_cluster_name
+
+- name: Enforce secure Jenkins kubeconfig permissions
+  ansible.builtin.file:
+    path: "{{ jenkins_eks_home }}/.kube/config"
+    state: file
+    owner: "{{ jenkins_eks_user }}"
+    group: "{{ jenkins_eks_group }}"
+    mode: "0600"

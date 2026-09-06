@@ -1,0 +1,6 @@
+---
+jenkins_eks_user: jenkins
+jenkins_eks_group: jenkins
+jenkins_eks_home: /var/lib/jenkins
+jenkins_eks_cluster_name: devops-eks-cluster
+jenkins_eks_region: us-east-1
