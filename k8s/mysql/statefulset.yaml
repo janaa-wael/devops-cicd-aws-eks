@@ -1,0 +1,66 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mysql
+  namespace: devops-app
+  labels:
+    app.kubernetes.io/name: mysql
+    app.kubernetes.io/instance: bucketlist
+    app.kubernetes.io/component: database
+spec:
+  serviceName: mysql-headless
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: mysql
+      app.kubernetes.io/instance: bucketlist
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: mysql
+        app.kubernetes.io/instance: bucketlist
+        app.kubernetes.io/component: database
+    spec:
+      terminationGracePeriodSeconds: 30
+      containers:
+        - name: mysql
+          image: 470850267441.dkr.ecr.us-east-1.amazonaws.com/devops-mysql@sha256:c6338f91cc3b4bdf1ed268dade6622d9b80ae100cc5be643d8fd437271c892f0
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mysql-secret
+                  key: MYSQL_DATABASE_PASSWORD
+            - name: MYSQL_ROOT_HOST
+              value: "%"
+          ports:
+            - name: mysql
+              containerPort: 3306
+              protocol: TCP
+          startupProbe:
+            tcpSocket:
+              port: mysql
+            periodSeconds: 5
+            timeoutSeconds: 2
+            failureThreshold: 30
+          readinessProbe:
+            tcpSocket:
+              port: mysql
+            periodSeconds: 5
+            timeoutSeconds: 2
+            failureThreshold: 3
+          livenessProbe:
+            tcpSocket:
+              port: mysql
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 2
+            failureThreshold: 3
+          volumeMounts:
+            - name: mysql-data
+              mountPath: /var/lib/mysql
+      volumes:
+        - name: mysql-data
+          persistentVolumeClaim:
+            claimName: mysql-data

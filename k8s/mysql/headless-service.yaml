@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql-headless
+  namespace: devops-app
+  labels:
+    app.kubernetes.io/name: mysql
+    app.kubernetes.io/instance: bucketlist
+    app.kubernetes.io/component: database
+spec:
+  clusterIP: None
+  selector:
+    app.kubernetes.io/name: mysql
+    app.kubernetes.io/instance: bucketlist
+  ports:
+    - name: mysql
+      port: 3306
+      targetPort: mysql
+      protocol: TCP
